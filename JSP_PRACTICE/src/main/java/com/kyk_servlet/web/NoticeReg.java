@@ -15,7 +15,7 @@ public class NoticeReg extends HttpServlet {
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		resp.setCharacterEncoding("UTF-8");
 		resp.setContentType("text/html; charset=UTF-8");
-		req.setCharacterEncoding("UTF-8");
+		// req.setCharacterEncoding("UTF-8");
 		
 		PrintWriter out = resp.getWriter();
 		
