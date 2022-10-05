@@ -38,7 +38,6 @@ public class Calculator extends HttpServlet {
 
 		PrintWriter out = resp.getWriter();
 		out.write("<!DOCTYPE html>");
-
 		out.write("<html>");
 		out.write("<head>");
 		out.write("<meta charset=\"UTF-8\">");
