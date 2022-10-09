@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.kyk_servlet.web.entity.Notice;
+import com.kyk_servlet.web.service.NoticeService;
 
 @WebServlet("/notice/list")
 
@@ -25,44 +26,10 @@ public class NoticeListController extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		 
 		// notice 객체를 여러개를 담기 위한 리스트 선언
-		List<Notice> list = new ArrayList<>();
-		
-		String sql = "SELECT * FROM NOTICE";
-		String url = "jdbc:oracle:thin:@localhost:1521/xepdb1"; // 오라클 thin 타입의 드라이버, 데이터베이스 서버 IP, 서비스하는 리스너의 포트번호, 서비스이름 
-		String user = "kyk";
-		String password = "kim690715";
+		NoticeService service = new NoticeService(); // NoticeService에서 가져옴
+		List<Notice> list = service.getNoticeList();
 		
 		
-		try {
-			String driver = "oracle.jdbc.driver.OracleDriver";  
-			Class.forName(driver);
-			Connection conn = DriverManager.getConnection(url, user, password);
-			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery(sql);
-
-			while(rs.next()) { 
-				int id = rs.getInt("ID");
-				String title = rs.getString("TITLE");
-				String writerId = rs.getString("WRITER_ID");
-				Date regdate = rs.getDate("REGDATE");
-				int hit = rs.getInt("HIT");
-				String files = rs.getString("FILES");
-				String content = rs.getString("CONTENT");
-				
-				Notice notice = new Notice(id, title, writerId, regdate, hit, files, content); // 게터 세터 때문에 오버로드된 생성자와 값을 채우는 순서가 일치해야함
-				list.add(notice);
-			} 
-				
-			rs.close(); 
-			stmt.close(); 
-			conn.close();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}  
 		
 		
 		request.setAttribute("list", list); // 리스트 request 저장소에 담기
