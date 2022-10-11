@@ -11,29 +11,52 @@ import java.util.Date;
 import java.util.List;
 
 import com.kyk_servlet.web.entity.Notice;
+import com.kyk_servlet.web.entity.NoticeView;
 
 // 서블릿을 업무 서비스로 따로 분리
 public class NoticeService {
+	public int removeNoticeAll(int[] ids){
+		return 0;
+	}
+	public int pubNoticeAll(int[] ids){
+		return 0;
+	}
+	public int insertNotice(Notice notice) {
+		return 0;
+	}
+	
+	public int deleteNotice(int id) {
+		return 0;
+	}
+	
+	public int updateNotice(Notice notice) {
+		return 0;
+	}
+	public List<Notice> getNoticeNewestList(){
+		return null;
+	}
+	
+	
 	// 함수명이 같으면(오버로드 관계) 기능이 같고 코드가 유사하다. 중복과 수정의 어려움이 있기에 하나만 구현하고 재호출하는 식으로 해야 코드관리가 편해진다.
-	public List<Notice> getNoticeList() { 
+	public List<NoticeView> getNoticeViewList() { 
 
-		return getNoticeList("title", "", 1); // 재호출
+		return getNoticeViewList("title", "", 1); // 재호출
 
 	}
 
-	public List<Notice> getNoticeList(int page) {
+	public List<NoticeView> getNoticeViewList(int page) {
 
-		return getNoticeList("title", "", page); // 재호출
+		return getNoticeViewList("title", "", page); // 재호출
 	}
 
-	public List<Notice> getNoticeList(String field/*TITLE, WRIRER_ID*/, String query/*A*/, int page) { // 목록을 얻기위한 함수
+	public List<NoticeView> getNoticeViewList(String field/*TITLE, WRIRER_ID*/, String query/*A*/, int page) { // 목록을 얻기위한 함수
 
-		// notice 객체를 여러개를 담기 위한 리스트 선언
-		List<Notice> list = new ArrayList<>();
+		// NoticeView 객체를 여러개를 담기 위한 리스트 선언
+		List<NoticeView> list = new ArrayList<>();
 		
 		String sql = "SELECT * FROM ("
 				+ "    SELECT ROWNUM NUM, N.* "
-				+ "    FROM (SELECT * FROM NOTICE WHERE "+ field + " LIKE ? ORDER BY REGDATE DESC) N "
+				+ "    FROM (SELECT * FROM NOTICE_VIEW WHERE "+ field + " LIKE ? ORDER BY REGDATE DESC) N "
 				+ ") "
 				+ "WHERE NUM BETWEEN ? AND ?"; // 1, 11, 21, 31 -> 등차수열 an = a1+(n-1)*10 -> an = 1+(page-1)*10
 		                                        // 10, 20, 30, 40 -> page*10 
@@ -62,9 +85,10 @@ public class NoticeService {
 				Date regdate = rs.getDate("REGDATE");
 				int hit = rs.getInt("HIT");
 				String files = rs.getString("FILES");
-				String content = rs.getString("CONTENT");
+				//String content = rs.getString("CONTENT");
+				int cmtCount = rs.getInt("CMT_COUNT");
 
-				Notice notice = new Notice(id, title, writerId, regdate, hit, files, content); // 게터 세터 때문에 오버로드된 생성자와
+				NoticeView notice = new NoticeView(id, title, writerId, regdate, hit, files, cmtCount); // 게터 세터 때문에 오버로드된 생성자와
 																								// 값을 채우는 순서가 일치해야함
 				list.add(notice);
 			}
@@ -94,7 +118,7 @@ public class NoticeService {
 		
 		String sql = "SELECT COUNT(ID) COUNT FROM ("
 				+ "    SELECT ROWNUM NUM, N.* "
-				+ "    FROM (SELECT * FROM NOTICE WHERE \"+ field + \" LIKE ? ORDER BY REGDATE DESC) N "
+				+ "    FROM (SELECT * FROM NOTICE WHERE "+ field + " LIKE ? ORDER BY REGDATE DESC) N "
 				+ ") ";
 				
 		
@@ -113,8 +137,9 @@ public class NoticeService {
 			pstmt.setString(1, "%"+query+"%");
 			
 			ResultSet rs = pstmt.executeQuery();
-
-			count = rs.getInt("COUNT");
+			
+			if(rs.next())
+				count = rs.getInt("COUNT");
 			
 			rs.close();
 			pstmt.close();
@@ -277,5 +302,46 @@ public class NoticeService {
 		}
 
 		return notice;
+	}
+	
+	public int deleteNoticeALL(int[] ids) {
+
+		int result = 0;
+		
+		String params = "";
+		
+		for(int i=0; i<ids.length; i++) { // 1,2,3 같은 문자열 형태로 만들기 위한 반복
+			params += ids[i];
+			
+			if(i <= ids.length-1) // 마지막 끝이 같기 전까지 반복
+				params +=",";
+		}
+		String sql = "DELETE NOTICE WHERE ID IN (" + params + ")";
+		
+		String url = "jdbc:oracle:thin:@localhost:1521/xepdb1"; // 오라클 thin 타입의 드라이버, 데이터베이스 서버 IP, 서비스하는 리스너의 포트번호,
+																// 서비스이름
+		String user = "kyk";
+		String password = "kim690715";
+		
+		try {
+			String driver = "oracle.jdbc.driver.OracleDriver";
+			Class.forName(driver);
+			Connection conn = DriverManager.getConnection(url, user, password);
+			Statement stmt = conn.createStatement(); // 미리 sql 준비
+			
+			result = stmt.executeUpdate(sql); // executeUpdate는 insert update delete일 때 사용
+
+			stmt.close();
+			conn.close();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		return result;
 	}
 }

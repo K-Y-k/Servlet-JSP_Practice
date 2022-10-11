@@ -2,9 +2,12 @@
 <%@page import="com.kyk_servlet.web.entity.Notice"%>
 <%@page import="java.util.List"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
- <%@ taglib prefix = "c" uri ="http://java.sun.com/jsp/jstl/core" %>
+    pageEncoding="UTF-8"%> 
+<%@ taglib prefix="c" uri ="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="format" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+
+
 
 <%-- MVC model1
 <%
@@ -189,12 +192,12 @@
 					<fieldset>
 						<legend class="hidden">공지사항 검색 필드</legend>
 						<label class="hidden">검색분류</label>
-						<select name="f">
-							<option  value="title">제목</option>
-							<option  value="writerId">작성자</option>
+						<select name="f"> 
+							<option ${(param.f == "title")?"selected":""} value="title">제목</option>  <!-- 검색어 상태 유지를 위해 삼항 연산자로 selected -->
+							<option ${(param.f == "writer_id")?"selected":""} value="writer_id">작성자</option>
 						</select> 
-						<label class="hidden">검색어</label>
-						<input type="text" name="q" value=""/>
+						<label class="hidden">검색어</label> <!-- list?f=title&q=~ 이런 형태로 전송된다. -->
+						<input type="text" name="q" value="${param.q}"/>
 						<input class="btn btn-search" type="submit" value="검색" />
 					</fieldset>
 				</form>
@@ -223,7 +226,7 @@
 					                                                       <!--begin end 옵션으로 꺼내는 값 제한 가능 varStatus="status"으로 필요한 기능 활용가능-->
 					<tr>
 						<td><!--${status.index+1}-->${n.id}</td>
-						<td class="title indent text-align-left"><a href="detail?id=${n.id}">${n.title}</a></td>
+						<td class="title indent text-align-left"><a href="detail?id=${n.id}">${n.title}</a><span style = "color: blue;">(${n.cmtCount})</span></td>
 						<td>${n.writerId}</td>
 						<td><format:formatDate pattern="yy-MM-dd" value="${n.regdate}"></format:formatDate></td>
 						<td>${n.hit}</td>
@@ -234,51 +237,61 @@
 					</tbody>
 				</table>
 			</div>
-			
-			<div class="indexer margin-top align-right">
-				<h3 class="hidden">현재 페이지</h3>
-				<div><span class="text-orange text-strong">1</span> / 1 pages</div>
-			</div>
 
-			<div class="margin-top align-center pager">	
-		
-	<!-- 임시변수를 만들 때의 태그 -->
-	<c:set var="page" value="${(param.p==null)?1:param.p}"/> <!-- null일 경우 1 아니면 param.p를 전달 -->
-	<c:set var="startNum" value="${page-(page-1)%5 }"/> 
-	<c:set var="lastNum" value="23"/> <!-- 잠깐 임시 설정 -->
-		
-	<div>
-		<!-- 이전 페이지가 있을 시 -->
-		<c:if test="${startNum > 1}">
-			<a href="?p=${startNum-1}&t=&q=" class="btn btn-next">이전</a>	
-		</c:if>
-		
-		<!-- 이전 페이지가 없을 시 -->
-		<c:if test="${startNum <= 1}">
-			<span class="btn btn-prev" onclick="alert('이전 페이지가 없습니다.');">이전</span>
-		</c:if>
-	</div>
-	
-	<ul class="-list- center">
-		<c:forEach var="i" begin="0" end="4">
-			<li><a class="-text- orange bold" href="?p=${startNum+i}&t=&q=" >${startNum+i}</a></li>
-		</c:forEach>
-	</ul>
-	
-	<div>
-		<!-- 다음 페이지가 있을 시 -->
-		<c:if test="${startNum+5 < lastNum}">
-			<a href="?p=${startNum+5}&t=&q=" class="btn btn-next">다음</a>	
-		</c:if>
-		
-		<!-- 다음 페이지가 없을 시 -->
-		<c:if test="${startNum+5 >= lastNum}">
-			<span class="btn btn-next" onclick="alert('다음 페이지가 없습니다.');">다음</span>
-		</c:if>
-	</div>
-	
-			</div>
-		</main>
+				<!-- 임시변수를 만들 때의 태그 -->
+				<c:set var="page" value="${(empty param.p)?1:param.p}" /> <!-- null이나 빈 문자열일 경우 1 아니면 param.p를 전달 -->
+				<c:set var="startNum" value="${page-(page-1)%5 }" />
+				<c:set var="lastNum" value="${fn:substringBefore(Math.ceil(count/10), '.')}" /> <!-- substringBefore는 구분자를 기준으로 자를 수 있다. -->
+
+
+				<div class="indexer margin-top align-right">
+					<h3 class="hidden">현재 페이지</h3>
+					<div>
+						<span class="text-orange text-strong">${(empty param.p)?1:param.p }</span> <!-- 빈문자열 -->
+						/ ${lastNum } pages
+					</div> 
+				</div>
+
+				<div class="margin-top align-center pager">
+
+
+					<div>
+						<!-- 이전 페이지가 있을 시 -->
+						<c:if test="${startNum > 1}">
+							<a href="?p=${startNum-1}&t=&q=" class="btn btn-next">이전</a>
+						</c:if>
+
+						<!-- 이전 페이지가 없을 시 -->
+						<c:if test="${startNum <= 1}">
+							<span class="btn btn-prev" onclick="alert('이전 페이지가 없습니다.');">이전</span>
+						</c:if>
+					</div>
+
+					<ul class="-list- center">
+						<c:forEach var="i" begin="0" end="4">
+							<c:if test="${(startNum+i) <= lastNum }">
+								<!-- 페이지 개수 맞추기 위한 조건 -->
+								<li><a
+									class="-text- ${(page==(startNum+i))?'orange':''} bold"
+									href="?p=${startNum+i}&f=${param.f}&q=${param.q}">${startNum+i}</a></li>
+							</c:if>
+						</c:forEach>
+					</ul>
+
+					<div>
+						<!-- 다음 페이지가 있을 시 -->
+						<c:if test="${startNum+4 < lastNum}">
+							<a href="?p=${startNum+5}&t=&q=" class="btn btn-next">다음</a>
+						</c:if>
+
+						<!-- 다음 페이지가 없을 시 -->
+						<c:if test="${startNum+4 >= lastNum}">
+							<span class="btn btn-next" onclick="alert('다음 페이지가 없습니다.');">다음</span>
+						</c:if>
+					</div>
+
+				</div>
+			</main>
 		
 			
 		</div>
