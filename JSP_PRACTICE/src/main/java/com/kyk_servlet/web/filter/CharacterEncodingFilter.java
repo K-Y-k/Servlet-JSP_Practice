@@ -19,9 +19,9 @@ public class CharacterEncodingFilter implements Filter {
 			throws IOException, ServletException {
 		
 		req.setCharacterEncoding("UTF-8");
-		System.out.println("chain 실행 전에 해야할 설정들"); 
+		//System.out.println("chain 실행 전에 해야할 설정들"); 
 		chain.doFilter(req, resp); // 흐름을 넘겨 다음 필터 또는 서블릿 실행
-		System.out.println("chain 실행 후에 해야할 것들"); 
+		//System.out.println("chain 실행 후에 해야할 것들"); 
 
 	}
 

@@ -21,8 +21,42 @@ public class NoticeService {
 	public int pubNoticeAll(int[] ids){
 		return 0;
 	}
-	public int insertNotice(Notice notice) {
-		return 0;
+	public int insertNotice(Notice notice) { // 글 등록 함수
+		int result = 0;
+		
+		String sql = "INSERT INTO NOTICE(TITLE, CONTENT, WRITER_ID, PUB, FILES) VALUES(?,?,?,?,?)";
+		
+		String url = "jdbc:oracle:thin:@localhost:1521/xepdb1"; // 오라클 thin 타입의 드라이버, 데이터베이스 서버 IP, 서비스하는 리스너의 포트번호,
+																// 서비스이름
+		String user = "kyk";
+		String password = "kim690715";
+		
+		try {
+			String driver = "oracle.jdbc.driver.OracleDriver";
+			Class.forName(driver);
+			Connection conn = DriverManager.getConnection(url, user, password);
+			PreparedStatement pstmt = conn.prepareStatement(sql); // 미리 sql 준비
+			
+			pstmt.setString(1, notice.getTitle());
+			pstmt.setString(2, notice.getContent());
+			pstmt.setString(3, notice.getWriterId());
+			pstmt.setBoolean(4, notice.getPub());
+			pstmt.setString(5, notice.getFiles());
+			
+			result = pstmt.executeUpdate(); // executeUpdate는 insert update delete일 때 사용
+
+			pstmt.close();
+			conn.close();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		return result;
 	}
 	
 	public int deleteNotice(int id) {
@@ -32,6 +66,7 @@ public class NoticeService {
 	public int updateNotice(Notice notice) {
 		return 0;
 	}
+	
 	public List<Notice> getNoticeNewestList(){
 		return null;
 	}
@@ -87,8 +122,9 @@ public class NoticeService {
 				String files = rs.getString("FILES");
 				//String content = rs.getString("CONTENT");
 				int cmtCount = rs.getInt("CMT_COUNT");
+				boolean pub = rs.getBoolean("PUB");
 
-				NoticeView notice = new NoticeView(id, title, writerId, regdate, hit, files, cmtCount); // 게터 세터 때문에 오버로드된 생성자와
+				NoticeView notice = new NoticeView(id, title, writerId, regdate, hit, files, pub, cmtCount); // 게터 세터 때문에 오버로드된 생성자와
 																								// 값을 채우는 순서가 일치해야함
 				list.add(notice);
 			}
@@ -182,8 +218,9 @@ public class NoticeService {
 				int hit = rs.getInt("HIT");
 				String files = rs.getString("FILES");
 				String content = rs.getString("CONTENT");
+				boolean pub = rs.getBoolean("PUB");
 
-				notice = new Notice(id, title, writerId, regdate, hit, files, content); // 게터 세터 때문에 오버로드된 생성자와
+				notice = new Notice(id, title, writerId, regdate, hit, files, content, pub); // 게터 세터 때문에 오버로드된 생성자와
 				// 값을 채우는 순서가 일치해야함
 			
 			}
@@ -234,8 +271,9 @@ public class NoticeService {
 				int hit = rs.getInt("HIT");
 				String files = rs.getString("FILES");
 				String content = rs.getString("CONTENT");
+				boolean pub = rs.getBoolean("PUB");
 
-				notice = new Notice(id, title, writerId, regdate, hit, files, content); // 게터 세터 때문에 오버로드된 생성자와
+				notice = new Notice(id, title, writerId, regdate, hit, files, content, pub); // 게터 세터 때문에 오버로드된 생성자와
 				// 값을 채우는 순서가 일치해야함
 			
 			}
@@ -284,8 +322,9 @@ public class NoticeService {
 				int hit = rs.getInt("HIT");
 				String files = rs.getString("FILES");
 				String content = rs.getString("CONTENT");
+				boolean pub = rs.getBoolean("PUB");
 
-				notice = new Notice(id, title, writerId, regdate, hit, files, content); // 게터 세터 때문에 오버로드된 생성자와
+				notice = new Notice(id, title, writerId, regdate, hit, files, content, pub); // 게터 세터 때문에 오버로드된 생성자와
 				// 값을 채우는 순서가 일치해야함
 			
 			}
