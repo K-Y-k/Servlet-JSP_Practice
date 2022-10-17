@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -68,22 +69,39 @@ public class ListController extends HttpServlet {
 	
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String[] openIds = request.getParameterValues("open-id");
+		String[] openIds = request.getParameterValues("open-id"); // 공개한 id
 		String[] delIds = request.getParameterValues("del-id");
 		String cmd = request.getParameter("cmd");
+		String ids_ = request.getParameter("ids"); // 공개 id를 비교해서 확인하기 위해 받아온 전체 id
+		String[] ids = ids_.trim().split(" "); // 받아온 전체 id들 배열로 분리
+		
+		NoticeService service = new NoticeService();
 		
 		switch(cmd) { // 찍힌건 모두 전달되지만 value 값의 조건을 두어 해당하는 것만 찍히게 한다.
 		case "일괄공개":
 			for(String openId : openIds)
-				System.out.printf("open id : %s\n", openIds);
-			break;
-		case "일괄삭제":
-			NoticeService service = new NoticeService();
+				System.out.printf("opened id : %s\n", openId);
 			
-			int[] ids = new int[delIds.length];
+			List<String> oids = Arrays.asList(openIds); // 배열을 리스트 형태로 바꿀 때 사용
+			
+			List<String> cids = new ArrayList(Arrays.asList(ids)); // 전체 id로 받아온 뺀 id 리스트 객체로 선언
+			cids.removeAll(oids); // 전체 id - 공개 id = 비공개 id
+			System.out.println(Arrays.asList(ids));
+			System.out.println(oids);
+			System.out.println(cids);
+			
+			// 공개 비공개 설정한 것을 서비스에 보내서 업데이트
+			// Transaction 처리 = 둘 다 한번에 실행되어야한다.
+			service.pubNoticeAll(oids, cids);
+			
+			break;
+			
+		case "일괄삭제":
+			
+			int[] ids1 = new int[delIds.length];
 			for(int i=0; i<delIds.length; i++) 
-				ids[i] = Integer.parseInt(delIds[i]);
-			int result = service.deleteNoticeALL(ids);
+				ids1[i] = Integer.parseInt(delIds[i]);
+			int result = service.deleteNoticeALL(ids1);
 			
 			break;
 		}

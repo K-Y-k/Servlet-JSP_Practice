@@ -178,6 +178,11 @@
 
 							<c:forEach var="n" items="${list}"> <!-- el이 값을 하나씩 꺼낸 것을 pageContext인 지역변수 n에 저장했기에 사용가능해진 것-->
 								                                <!--begin end 옵션으로 꺼내는 값 제한 가능 varStatus="status"으로 필요한 기능 활용가능-->
+								<c:set var="open" value=""/>    <!-- 공개일 때의 체크박스 체크 -->
+								<c:if test="${n.pub}">
+										<c:set var="open" value="checked"/>
+ 								</c:if>
+								
 								<tr>
 									<td>
 										<!--${status.index+1}-->${n.id}</td>
@@ -188,7 +193,8 @@
 									<td><format:formatDate pattern="yy-MM-dd"
 											value="${n.regdate}"></format:formatDate></td>
 									<td>${n.hit}</td>
-									<td><input type="checkbox" name="open-id" value="${n.id}"></td> <!-- 체크박스와 summit이 동일 form에 있어야 작동한다. -->
+									
+									<td><input type="checkbox" name="open-id" ${open } value="${n.id}"></td> <!-- 체크박스와 summit이 동일 form에 있어야 작동한다. -->
 									<td><input type="checkbox" name="del-id" value="${n.id}"></td>
 								</tr>
 							</c:forEach>
@@ -212,6 +218,11 @@
 				</div>
 				
 				<div class="text-align-right margin-top">
+					<c:set var="ids" value=""/>
+					<c:forEach var="n" items="${list}"> <!-- 공개 설정을 위해 id들만 추출 -->
+						<c:set var="ids" value="${ids} ${n.id}"/>
+					</c:forEach>
+					<input type="hidden" name="ids" value="${ids}">
 					<input type="submit" class="btn-text btn-default" name="cmd" value="일괄공개">
 					<input type="submit" class="btn-text btn-default" name="cmd" value="일괄삭제">
 					<a class="btn-text btn-default" href="reg">글쓰기</a>				

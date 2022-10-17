@@ -50,6 +50,7 @@ public class RegController extends HttpServlet{
 		
 		for(Part p : parts) { // 반복문을 통해 여러 파일 담아오기
 			if(!p.getName().equals("file")) continue; // 이름이 파일이 아니면 패스
+			if(p.getSize()==0) continue; // 비어있는 데이터가 포스트 되었을 때 넘기기
 			
 			// 이름이 파일이 맞으면
 			Part filePart = p;  // 1.Part 자료형으로 저장
@@ -62,6 +63,11 @@ public class RegController extends HttpServlet{
 			// "/upload/" -> "c:upload\"이러한 절대경로로 변경해야한다.
 			String realPath = request.getServletContext().getRealPath("/upload"); // 3.동적으로 절대경로로 변환
 			System.out.println(realPath);
+			
+			// 실제 realPath가 없을 때의 대안
+			File path = new File(realPath); // 물리적인 경로가 있는지 확인
+			if(!path.exists()) // 경로가 존재하지 않는다면
+				path.mkdirs();  // mkdirs()는 부모path도 같이 생성한다. mkdir()는 끝의 마지막 폴더만 생성한다. 
 			
 			String filePath = realPath + File.separator + fileName;  // 저장할 경로 설정 \같은 경로 구분은 File.separator이 대신해줌
 			FileOutputStream fos = new FileOutputStream(filePath); // 출력하기 위한 버퍼 생성

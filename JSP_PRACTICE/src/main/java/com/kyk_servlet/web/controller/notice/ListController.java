@@ -46,7 +46,7 @@ public class ListController extends HttpServlet {
 		
 		// notice 객체를 여러개를 담기 위한 리스트 선언
 		NoticeService service = new NoticeService(); // NoticeService에서 가져옴
-		List<NoticeView> list = service.getNoticeViewList(field, query, page);
+		List<NoticeView> list = service.getNoticePubViewList(field, query, page);
 		
 		int count = service.getNoticeCount(field, query); // 레코드 개수를 알기 위한 count 선언
 		
